@@ -82,7 +82,7 @@ export default {
   data () {
     return {
       form: {
-        YieldMore: 20,
+        YieldMore: 7,
         YieldLess: 40,
         PriceMore: 60,
         PriceLess: 110,

@@ -44,13 +44,13 @@
                    class="form-control" :disabled="isLoading">
           </div>
         </div>
-<!--        <h6>Объем сделок</h6>-->
-<!--        <input type="number" min="0" id="VolumeMore" v-model="form.VolumeMore" class="form-control"-->
-<!--               :disabled="isLoading">-->
-<!---->
-<!--        <h6>Совокупный объем сделок</h6>-->
-<!--        <input type="number" min="0" id="BondVolumeMore" v-model="form.BondVolumeMore" class="form-control"-->
-<!--               :disabled="isLoading">-->
+        <!--        <h6>Объем сделок</h6>-->
+        <!--        <input type="number" min="0" id="VolumeMore" v-model="form.VolumeMore" class="form-control"-->
+        <!--               :disabled="isLoading">-->
+        <!---->
+        <!--        <h6>Совокупный объем сделок</h6>-->
+        <!--        <input type="number" min="0" id="BondVolumeMore" v-model="form.BondVolumeMore" class="form-control"-->
+        <!--               :disabled="isLoading">-->
 
         <h6>Учитывать, чтобы денежные выплаты были известны до самого погашения?</h6>
         <input type="checkbox" name="OfferYesNo" :checked="form.OfferYesNo" :disabled="isLoading">
@@ -82,7 +82,7 @@ export default {
   data () {
     return {
       form: {
-        YieldMore: 7,
+        YieldMore: 20,
         YieldLess: 40,
         PriceMore: 60,
         PriceLess: 110,
@@ -216,7 +216,7 @@ export default {
             const coupons_data = await axios.get(`https://iss.moex.com/iss/statistics/engines/stock/markets/bonds/bondization/${marketData[i].SECID}.json?iss.meta=off&iss.only=coupons`);
             let couponDates = []
             let value_rubNull = 0
-            for (let j = 0; j <= coupons_data.data.coupons.data.length - 1; j++) {
+            for (let j = 0; j < coupons_data.data.coupons.data.length; j++) {
               let coupondate = coupons_data.data.coupons.data[j][3] // даты купона
               let value_rub = coupons_data.data.coupons.data[j][9] // сумма выплаты купона
               let inFuture = new Date(coupondate) > new Date()
@@ -227,7 +227,7 @@ export default {
                 }
               }
 
-              if(value_rubNull > 0 && filters.OfferYesNo){
+              if (value_rubNull > 0 && filters.OfferYesNo) {
                 continue
               }
 
@@ -236,23 +236,9 @@ export default {
                 return a - b;
               })
 
-              let formattedDates = ''
-              for (let y = 1; y < 13; y++) {
-                formattedDates += uniqueDates.includes(y) ? `${y} ` : ` `
-              }
-              marketData[i].MonthsOfPaymentsDates = formattedDates
-                  .replace(/1\s/g, 'янв ')
-                  .replace(/2\s/g, 'фев ')
-                  .replace(/3\s/g, 'мар ')
-                  .replace(/4\s/g, 'апр ')
-                  .replace(/5\s/g, 'май ')
-                  .replace(/6\s/g, 'июн ')
-                  .replace(/7\s/g, 'июл ')
-                  .replace(/8\s/g, 'авг ')
-                  .replace(/9\s/g, 'сен ')
-                  .replace(/10\s/g, 'окт ')
-                  .replace(/11\s/g, 'ноя ')
-                  .replace(/12\s/g, 'дек ')
+              marketData[i].MonthsOfPaymentsDates = uniqueDates.map(
+                  monthNumber => moment(monthNumber, 'M', 'ru').format('MMM')
+              ).join(' ')
             }
           }
           if (marketData[i].BondVolume < 0) {

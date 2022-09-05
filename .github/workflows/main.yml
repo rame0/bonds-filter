@@ -1,9 +1,9 @@
 name: Build and Deploy Vue Application to Github Pages
-on: 
-    workflow_dispatch:
-    push:
-        branches:
-            -master
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
 jobs:
   build_deploy_vue:
     runs-on: ubuntu-latest
@@ -13,6 +13,7 @@ jobs:
     - id: Build-Deploy-Vue
       uses: xRealNeon/VuePagesAction@1.0.1
       with:
+        useyarn: true
         username: 'rame0'
         reponame: 'bonds-filter'
         token: ${{ secrets.GITHUB_TOKEN }} # no need to change this line this is used to create the branch in your application repository

@@ -40,7 +40,6 @@ export default {
     const column = toRef(props, "column")
     const sort = useVModel(props, "sort", emit)
     const changeSort = () => {
-      console.log('change sort')
       if (sort.value.column !== column.value.field) {
         sort.value = {column: column.value.field, descending: false}
       } else if (sort.value.descending === false) {

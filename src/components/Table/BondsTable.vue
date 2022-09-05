@@ -4,7 +4,7 @@
       <thead>
       <tr>
         <!--      <th v-for="col in columns" :key="col.field">{{ col.title }}</th>-->
-        <TableColumn v-for="col in columns" :column="col" :key="col.field" v-model:sort="sort"/>
+        <TableColumn v-for="col in columns" :column="col" :key="col.field" v-model:sort="sortProp"/>
       </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-100">
@@ -55,7 +55,7 @@ export default {
     return {rowsProp, sortProp, update}
   },
   watch: {
-    sort: {
+    sortProp: {
       deep: true,
       handler () {
         this.update()

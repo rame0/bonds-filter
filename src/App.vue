@@ -6,7 +6,7 @@
           Идет обработка запроса.
           Обработано {{ updateProgress }} строк из {{ total }}.
         </div>
-        <BondsTable :rows="rows" :columns="columns" :sort="sort"></BondsTable>
+        <BondsTable :rows="rows" :columns="columns" v-model:sort="sort"></BondsTable>
       </div>
       <div class="col-3">
         <h6>Доход (от - до)</h6>
@@ -51,9 +51,9 @@
 <!--        <h6>Совокупный объем сделок</h6>-->
 <!--        <input type="number" min="0" id="BondVolumeMore" v-model="form.BondVolumeMore" class="form-control"-->
 <!--               :disabled="isLoading">-->
-<!---->
-<!--        <h6>Учитывать, чтобы денежные выплаты были известны до самого погашения?</h6>-->
-<!--        <input type="checkbox" name="OfferYesNo" :checked="form.OfferYesNo" :disabled="isLoading">-->
+
+        <h6>Учитывать, чтобы денежные выплаты были известны до самого погашения?</h6>
+        <input type="checkbox" name="OfferYesNo" :checked="form.OfferYesNo" :disabled="isLoading">
         <div class="row">
           <div class="col">
             Показано <b>{{ filtered }}</b> из <u>{{ total }}</u>
@@ -227,6 +227,10 @@ export default {
                 }
               }
 
+              if(value_rubNull > 0 && filters.OfferYesNo){
+                continue
+              }
+
               let uniqueDates = [...new Set(couponDates)] // уникальные значения месяцев
               uniqueDates = uniqueDates.sort(function (a, b) {
                 return a - b;
@@ -277,6 +281,7 @@ export default {
             marketData[i].BondVolume = volume_sum
 
           }
+
 
           filteredData.push(marketData[i]);
         }

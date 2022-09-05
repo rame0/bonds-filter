@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - id: Build-Deploy-Vue
-      uses: thefrustrateddev/vue-deploy-github-pages@v1.0.0
+      uses: xRealNeon/VuePagesAction@1.0.1
       with:
         username: 'rame0'
         reponame: 'bonds-filter'

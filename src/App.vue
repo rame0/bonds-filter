@@ -1,4 +1,7 @@
 <template>
+
+  <ForkMe/>
+
   <div class="container-fluid">
     <div class="row">
       <div class="col-9">
@@ -12,48 +15,38 @@
         <h6>Доход (от - до)</h6>
         <div class="row">
           <div class="col">
-            <input type="number" min="0" :max="form.YieldLess-1" step="0.01" id="YieldMore" v-model="form.YieldMore"
-                   class="form-control" :disabled="isLoading">
-          </div>
-          <div class="col">
-            <input type="number" :min="form.YieldMore+1" max="300" step="0.01" id="YieldLess"
-                   v-model="form.YieldLess"
-                   class="form-control" :disabled="isLoading">
+            <Slider v-model="form.Yield" :disabled="isLoading" class="mt-5" :max="150" :min="-10"/>
           </div>
         </div>
-
+<hr/>
         <h6>Цена (от - до)</h6>
         <div class="row">
           <div class="col">
-            <input type="number" min="0" :max="form.PriceLess-1" id="PriceMore" v-model="form.PriceMore"
-                   class="form-control" :disabled="isLoading">
-          </div>
-          <div class="col">
-            <input type="number" :min="form.PriceMore+1" max="300" id="PriceLess" v-model="form.PriceLess"
-                   class="form-control" :disabled="isLoading">
+            <Slider v-model="form.Price" :disabled="isLoading" class="mt-5" :max="200" :min="-50"/>
           </div>
         </div>
+        <hr/>
         <h6>Дюрация (от - до)</h6>
         <div class="row">
           <div class="col">
-            <input type="number" min="0" :max="form.DurationLess-1" id="DurationMore" v-model="form.DurationMore"
-                   class="form-control" :disabled="isLoading">
-          </div>
-          <div class="col">
-            <input type="number" :min="form.DurationMore+1" max="300" id="DurationLess" v-model="form.DurationLess"
-                   class="form-control" :disabled="isLoading">
+            <Slider v-model="form.Duration" :disabled="isLoading" class="mt-5" :max="200" :min="0"/>
           </div>
         </div>
+
+        <hr/>
         <!--        <h6>Объем сделок</h6>-->
         <!--        <input type="number" min="0" id="VolumeMore" v-model="form.VolumeMore" class="form-control"-->
         <!--               :disabled="isLoading">-->
         <!---->
+        <hr/>
         <!--        <h6>Совокупный объем сделок</h6>-->
         <!--        <input type="number" min="0" id="BondVolumeMore" v-model="form.BondVolumeMore" class="form-control"-->
         <!--               :disabled="isLoading">-->
-
+<!--        <hr/>-->
         <h6>Учитывать, чтобы денежные выплаты были известны до самого погашения?</h6>
         <input type="checkbox" name="OfferYesNo" :checked="form.OfferYesNo" :disabled="isLoading">
+
+        <hr/>
         <div class="row">
           <div class="col">
             Показано <b>{{ filtered }}</b> из <u>{{ total }}</u>
@@ -69,6 +62,8 @@ import axios from "axios";
 import {computed, ref} from "vue";
 import moment from "moment"
 import BondsTable from "@/components/Table/BondsTable";
+import ForkMe from "@/icons/ForkMe";
+import Slider from '@vueform/slider'
 
 /**
  *
@@ -78,16 +73,13 @@ let marketData = []
 
 export default {
   name: 'App',
-  components: {BondsTable},
+  components: {BondsTable, ForkMe, Slider},
   data () {
     return {
       form: {
-        YieldMore: 20,
-        YieldLess: 40,
-        PriceMore: 60,
-        PriceLess: 110,
-        DurationMore: 6,
-        DurationLess: 13,
+        Yield: [20, 40],
+        Price: [60, 110],
+        Duration: [6, 13],
         VolumeMore: 400,
         BondVolumeMore: 10000,
         OfferYesNo: true,
@@ -123,6 +115,7 @@ export default {
           return '??'
       }
     }
+
 
     const columns = computed(() =>
         [
@@ -209,9 +202,9 @@ export default {
       this.rows = [];
       for (let i = 0; i < marketData.length; i++) {
         this.updateProgress++;
-        if (marketData[i].BondYield > filters.YieldMore && marketData[i].BondYield < filters.YieldLess
-            && marketData[i].BondPrice > filters.PriceMore && marketData[i].BondPrice < filters.PriceLess
-            && marketData[i].BondDuration > filters.DurationMore && marketData[i].BondDuration < filters.DurationLess) {
+        if (marketData[i].BondYield > filters.Yield[0] && marketData[i].BondYield < filters.Yield[1]
+            && marketData[i].BondPrice > filters.Price[0] && marketData[i].BondPrice < filters.Price[1]
+            && marketData[i].BondDuration > filters.Duration[0] && marketData[i].BondDuration < filters.Duration[1]) {
           if (!marketData[i].MonthsOfPaymentsDates) {
             const coupons_data = await axios.get(`https://iss.moex.com/iss/statistics/engines/stock/markets/bonds/bondization/${marketData[i].SECID}.json?iss.meta=off&iss.only=coupons`);
             let couponDates = []
@@ -279,3 +272,5 @@ export default {
   }
 }
 </script>
+
+<style src="@vueform/slider/themes/default.css"></style>

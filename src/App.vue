@@ -12,13 +12,29 @@
         <BondsTable :rows="rows" :columns="columns" v-model:sort="sort"></BondsTable>
       </div>
       <div class="col-3">
+        <div class="row">
+          <div class="col">
+            <!--            <select multiple="true" v-model="form.Type" class="form-control">-->
+            <!--              <option v-for="type in TypeOptions" :value="type.type" :key="type.type">-->
+            <!--                {{ type.name }}-->
+            <!--              </option>-->
+            <!--            </select>-->
+            <div class="form-check" v-for="type in TypeOptions" :key="type.type">
+              <input class="form-check-input" type="checkbox" :value="type.type" id="flexCheckDefault"
+                     v-model="form.Type">
+              <label class="form-check-label" for="flexCheckDefault">
+                {{ type.name }}
+              </label>
+            </div>
+          </div>
+        </div>
         <h6>Доход (от - до)</h6>
         <div class="row">
           <div class="col">
             <Slider v-model="form.Yield" :disabled="isLoading" class="mt-5" :max="150" :min="-10"/>
           </div>
         </div>
-<hr/>
+        <hr/>
         <h6>Цена (от - до)</h6>
         <div class="row">
           <div class="col">
@@ -42,7 +58,7 @@
         <!--        <h6>Совокупный объем сделок</h6>-->
         <!--        <input type="number" min="0" id="BondVolumeMore" v-model="form.BondVolumeMore" class="form-control"-->
         <!--               :disabled="isLoading">-->
-<!--        <hr/>-->
+        <!--        <hr/>-->
         <h6>Учитывать, чтобы денежные выплаты были известны до самого погашения?</h6>
         <input type="checkbox" name="OfferYesNo" :checked="form.OfferYesNo" :disabled="isLoading">
 
@@ -63,7 +79,8 @@ import {computed, ref} from "vue";
 import moment from "moment"
 import BondsTable from "@/components/Table/BondsTable";
 import ForkMe from "@/icons/ForkMe";
-import Slider from '@vueform/slider'
+import Slider from '@vueform/slider';
+import {SecTypeList} from "@/common/secType";
 
 /**
  *
@@ -76,6 +93,7 @@ export default {
   components: {BondsTable, ForkMe, Slider},
   data () {
     return {
+      TypeOptions: SecTypeList,
       form: {
         Yield: [20, 40],
         Price: [60, 110],
@@ -83,6 +101,7 @@ export default {
         VolumeMore: 400,
         BondVolumeMore: 10000,
         OfferYesNo: true,
+        Type: [3,],
       },
       rows: [],
       total: 0,
@@ -116,7 +135,6 @@ export default {
       }
     }
 
-
     const columns = computed(() =>
         [
           {name: "BondName", title: "Полное наименование", field: "BondName", sortable: true},
@@ -149,7 +167,7 @@ export default {
   },
   mounted () {
     this.isLoading = true;
-    const sec_request_columns = "SECID,SECNAME,PREVLEGALCLOSEPRICE,BOARDID,COUPONPERIOD,FACEVALUE,FACEUNIT";
+    const sec_request_columns = "SECID,SECNAME,PREVLEGALCLOSEPRICE,BOARDID,COUPONPERIOD,FACEVALUE,FACEUNIT,SECTYPE";
     let url1 = `https://iss.moex.com/iss/engines/stock/markets/bonds/boardgroups/7/securities.json?iss.dp=comma&iss.meta=off&iss.only=securities,marketdata&securities.columns=${sec_request_columns}&marketdata.columns=SECID,YIELD,DURATION`
     let url2 = `https://iss.moex.com/iss/engines/stock/markets/bonds/boardgroups/58/securities.json?iss.dp=comma&iss.meta=off&iss.only=securities,marketdata&securities.columns=${sec_request_columns}&marketdata.columns=SECID,YIELD,DURATION`
     let url3 = `https://iss.moex.com/iss/engines/stock/markets/bonds/boardgroups/193/securities.json?iss.dp=comma&iss.meta=off&iss.only=securities,marketdata&securities.columns=${sec_request_columns}&marketdata.columns=SECID,YIELD,DURATION`
@@ -179,6 +197,7 @@ export default {
           BondName: responce.securities.data[i][1].replace(/"/g, '').replace(/'/g, ''),
           SECID: responce.securities.data[i][0],
           BOARDID: responce.securities.data[i][3],
+          TYPE: responce.securities.data[i][7],
           FaceValue: responce.securities.data[i][5],
           FaceUnit: responce.securities.data[i][6],
           BondPrice: responce.securities.data[i][2],
@@ -202,7 +221,8 @@ export default {
       this.rows = [];
       for (let i = 0; i < marketData.length; i++) {
         this.updateProgress++;
-        if (marketData[i].BondYield > filters.Yield[0] && marketData[i].BondYield < filters.Yield[1]
+        if (filters.Type.includes(marketData[i].TYPE) &&
+            marketData[i].BondYield > filters.Yield[0] && marketData[i].BondYield < filters.Yield[1]
             && marketData[i].BondPrice > filters.Price[0] && marketData[i].BondPrice < filters.Price[1]
             && marketData[i].BondDuration > filters.Duration[0] && marketData[i].BondDuration < filters.Duration[1]) {
           if (!marketData[i].MonthsOfPaymentsDates) {
